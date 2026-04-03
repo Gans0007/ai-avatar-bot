@@ -28,11 +28,21 @@ app = FastAPI()
 app.include_router(payment_router, prefix="/api/payment")
 
 
-def get_buy_keyboard():
+def get_buy_keyboard(user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 Купить за 190 грн", callback_data="buy")],
-        [InlineKeyboardButton(text="🔍 Проверить оплату", callback_data="check_payment")]
-    ])
+        [
+            InlineKeyboardButton(
+                text="💳 Купить за 19$ грн",
+                url=f"https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/pay/{user_id}"
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="🔍 Проверить оплату",
+                callback_data="check_payment"
+            )
+        ]
+    ]))
 
 
 @dp.message(Command("start"))
@@ -99,9 +109,12 @@ async def check_payment_handler(callback: CallbackQuery):
             )
         else:
             await callback.message.answer(
-                "❌ Оплата не найдена\n\nПопробуй ещё раз через несколько секунд"
+                "⏳ Оплата ещё не поступила\n\n"
+                "Если ты уже оплатил — подожди 10–30 секунд и нажми ещё раз"
             )
 
+    except Exception as e:
+        await callback.message.answer(f"❌ Ошибка: {e}")
     except Exception as e:
         await callback.message.answer(f"❌ Ошибка: {e}")
 
