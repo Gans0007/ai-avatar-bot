@@ -68,11 +68,21 @@ from aiogram.types import CallbackQuery
 @dp.callback_query(lambda c: c.data == "check_payment")
 async def check_payment_handler(callback: CallbackQuery):
     await callback.answer()
+
     try:
         res = requests.get(
             f"https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/check/{callback.from_user.id}",
             timeout=10
         )
+
+        # 🔥 проверка ответа
+        if res.status_code != 200:
+            await callback.message.answer("❌ Сервер временно недоступен")
+            return
+
+        if not res.text:
+            await callback.message.answer("❌ Пустой ответ от сервера")
+            return
 
         data = res.json()
 
@@ -89,7 +99,7 @@ async def check_payment_handler(callback: CallbackQuery):
             )
 
     except Exception as e:
-        await callback.message.answer(f"❌ Ошибка: {e}")
+        await callback.message.answer("❌ Ошибка соединения с сервером")
 
 async def main():
     await create_pool()
