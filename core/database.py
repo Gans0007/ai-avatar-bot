@@ -15,6 +15,7 @@ async def create_pool():
     pool = await asyncpg.create_pool(
         DATABASE_URL,
         statement_cache_size=0,   # 🔥 КРИТИЧЕСКИЙ ФИКС
+        min_size=1, 
         max_size=5                # (опционально, но нормально для Railway)
     )
 
