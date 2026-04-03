@@ -37,7 +37,7 @@ def get_buy_keyboard(user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(
-                text="💳 Купить за 19$ грн",
+                text="💳 Купить за 19$",
                 url=f"https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/pay/{user_id}"
             )
         ],
