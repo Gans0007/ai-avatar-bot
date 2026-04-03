@@ -23,12 +23,11 @@ async def create_payment(request: Request):
     user_id = data.get("user_id")
 
     if not user_id:
-        print("❌ user_id missing")
         return {"error": "user_id missing"}
 
     payment_url = f"https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/pay/{user_id}"
 
-    print("✅ CREATE PAYMENT:", user_id, payment_url)
+    print("✅ CREATE PAYMENT:", user_id)
 
     return {
         "payment_url": payment_url
@@ -65,7 +64,7 @@ async def payment_webhook(request: Request):
     except:
         data = {}
 
-    print("📩 WEBHOOK DATA:", data)
+    print("📩 WEBHOOK:", data)
 
     status = data.get("transactionStatus")
     order_reference = data.get("orderReference")
@@ -78,6 +77,7 @@ async def payment_webhook(request: Request):
             return {"status": "error"}
 
         pool = await get_pool()
+
         async with pool.acquire() as conn:
             await conn.execute("""
                 UPDATE users
@@ -85,18 +85,37 @@ async def payment_webhook(request: Request):
                 WHERE telegram_user_id = $1
             """, user_id)
 
-        # отправка сообщения пользователю
+        # 🔥 отправка доступа
         try:
             requests.post(
                 f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
                 json={
                     "chat_id": user_id,
-                    "text": "✅ Оплата прошла!\n\nВот твой доступ:\nhttps://твой_курс"
+                    "text": "✅ Оплата прошла!\n\n🚀 Доступ открыт:\nhttps://t.me/yourambitions"
                 }
             )
         except Exception as e:
-            print("❌ Ошибка отправки сообщения:", e)
+            print("❌ Ошибка отправки:", e)
 
-        print("✅ ОПЛАТА УСПЕШНА:", user_id)
+        print("✅ PAYMENT SUCCESS:", user_id)
 
     return {"status": "ok"}
+
+
+# =========================
+# ПРОВЕРКА ОПЛАТЫ
+# =========================
+@router.get("/check/{user_id}")
+async def check_payment(user_id: int):
+    pool = await get_pool()
+
+    async with pool.acquire() as conn:
+        user = await conn.fetchrow(
+            "SELECT is_paid FROM users WHERE telegram_user_id = $1",
+            user_id
+        )
+
+    if not user:
+        return {"is_paid": False}
+
+    return {"is_paid": user["is_paid"]}
