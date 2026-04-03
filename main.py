@@ -44,7 +44,11 @@ async def start_handler(message: types.Message):
     )
 
     await message.answer(
-        "🔥 AI Avatar Intensive\n\nОплати доступ 👇",
+        "🤖 AI Avatar Intensive — $19\n\n"
+        "✅ HeyGen — AI аватар из видео\n"
+        "✅ AI аватар по фото\n"
+        "✅ Профессиональная озвучка\n\n"
+        "💳 После оплаты уроки придут сюда автоматически 👇",
         reply_markup=get_buy_keyboard()
     )
 
