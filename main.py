@@ -42,7 +42,7 @@ def get_buy_keyboard(user_id):
                 callback_data="check_payment"
             )
         ]
-    ]))
+    ])
 
 
 @dp.message(Command("start"))
@@ -59,42 +59,15 @@ async def start_handler(message: types.Message):
         "✅ AI аватар по фото\n"
         "✅ Профессиональная озвучка\n\n"
         "💳 После оплаты уроки придут сюда автоматически 👇",
-        reply_markup=get_buy_keyboard()
+        reply_markup=get_buy_keyboard(message.from_user.id)
     )
 
 from aiogram.types import CallbackQuery
 
-@dp.callback_query(lambda c: c.data == "buy")
-async def buy_handler(callback: CallbackQuery):
-    try:
-        res = requests.post(
-            "https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/create",
-            json={"user_id": callback.from_user.id},
-            timeout=10
-        )
-
-        payment = res.json()
-        payment_url = payment.get("payment_url")
-
-        if not payment_url:
-            await callback.message.answer("❌ Ошибка создания платежа")
-            return
-
-        # 🔥 КНОПКА СРАЗУ С ОПЛАТОЙ
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="💳 Оплатить", url=payment_url)]
-        ])
-
-        await callback.message.answer(
-            "🔥 Нажми чтобы оплатить:",
-            reply_markup=keyboard
-        )
-
-    except Exception as e:
-        await callback.message.answer(f"❌ Ошибка: {e}")
 
 @dp.callback_query(lambda c: c.data == "check_payment")
 async def check_payment_handler(callback: CallbackQuery):
+    await callback.answer()
     try:
         res = requests.get(
             f"https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/check/{callback.from_user.id}",
@@ -110,11 +83,11 @@ async def check_payment_handler(callback: CallbackQuery):
         else:
             await callback.message.answer(
                 "⏳ Оплата ещё не поступила\n\n"
-                "Если ты уже оплатил — подожди 10–30 секунд и нажми ещё раз"
+                "Если ты уже оплатил — подожди 10–30 секунд и нажми ещё раз\n\n"
+                "👇 Если ещё не оплатил — жми ниже",
+                reply_markup=get_buy_keyboard(callback.from_user.id)
             )
 
-    except Exception as e:
-        await callback.message.answer(f"❌ Ошибка: {e}")
     except Exception as e:
         await callback.message.answer(f"❌ Ошибка: {e}")
 
