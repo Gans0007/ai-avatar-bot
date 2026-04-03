@@ -106,6 +106,7 @@ async def check_payment_handler(callback: CallbackQuery):
     except Exception as e:
         await callback.message.answer("❌ Ошибка соединения с сервером")
 
+
 async def main():
     await create_pool()
     await dp.start_polling(bot)
