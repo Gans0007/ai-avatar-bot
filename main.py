@@ -1,5 +1,9 @@
-import asyncio
+import sys
 import os
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+import asyncio
 import requests
 
 from aiogram import Bot, Dispatcher, types
@@ -10,7 +14,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from core.database import create_pool
 from core.users import create_user
-from api.payment_routes import router as payment_router
+from api.payments_routes import router as payment_router
 
 load_dotenv()
 
@@ -20,7 +24,6 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 app = FastAPI()
 
-# подключаем роуты
 app.include_router(payment_router, prefix="/api/payment")
 
 
@@ -47,27 +50,15 @@ async def start_handler(message: types.Message):
 @dp.callback_query(lambda c: c.data == "buy")
 async def buy_handler(callback: types.CallbackQuery):
     res = requests.post(
-        "https://api.youramb.digital/api/payment/create",
+        "https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/create",
         json={"user_id": callback.from_user.id}
     )
 
     payment = res.json()
 
-    # создаем HTML форму
-    form_html = f"""
-    <html>
-    <body onload="document.forms[0].submit()">
-        <form method="POST" action="https://secure.wayforpay.com/pay">
-            {''.join([f'<input type="hidden" name="{k}" value="{v}">' for k, v in payment.items()])}
-        </form>
-    </body>
-    </html>
-    """
-
-    with open("payment.html", "w", encoding="utf-8") as f:
-        f.write(form_html)
-
-    await callback.message.answer("👉 Открой файл payment.html для оплаты")
+    await callback.message.answer(
+        f"👉 Оплати доступ:\n{payment['payment_url']}"
+    )
 
 
 async def main():

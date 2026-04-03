@@ -5,8 +5,7 @@ import time
 MERCHANT_ACCOUNT = "t_me_10acd"
 MERCHANT_SECRET = "ТВОЙ_СЕКРЕТ"
 
-DOMAIN = "api.youramb.digital"
-
+DOMAIN = "easygoing-spontaneity-production-b362.up.railway.app"
 
 def generate_signature(data: list):
     sign_str = ";".join(data)
