@@ -46,20 +46,36 @@ async def start_handler(message: types.Message):
         reply_markup=get_buy_keyboard()
     )
 
+from aiogram.types import CallbackQuery
 
 @dp.callback_query(lambda c: c.data == "buy")
-async def buy_handler(callback: types.CallbackQuery):
-    res = requests.post(
-        "https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/create",
-        json={"user_id": callback.from_user.id}
-    )
+async def buy_handler(callback: CallbackQuery):
+    try:
+        res = requests.post(
+            "https://easygoing-spontaneity-production-b362.up.railway.app/api/payment/create",
+            json={"user_id": callback.from_user.id},
+            timeout=10
+        )
 
-    payment = res.json()
+        print("STATUS:", res.status_code)
+        print("TEXT:", res.text)
 
-    await callback.message.answer(
-        f"👉 Оплати доступ:\n{payment['payment_url']}"
-    )
+        payment = res.json()
 
+        payment_url = payment.get("payment_url")
+
+        if not payment_url:
+            await callback.message.answer(
+                f"❌ Ошибка сервера:\n{payment}"
+            )
+            return
+
+        await callback.message.answer(
+            f"👉 Оплати доступ:\n{payment_url}"
+        )
+
+    except Exception as e:
+        await callback.message.answer(f"❌ Ошибка: {e}")
 
 async def main():
     await create_pool()
