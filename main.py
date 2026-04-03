@@ -93,7 +93,7 @@ async def check_payment_handler(callback: CallbackQuery):
 
         if data.get("is_paid"):
             await callback.message.answer(
-                "✅ Оплата найдена!\n\n🚀 Доступ:\nhttps://t.me/yourambitions"
+                "✅ Оплата найдена!\n\n🚀 Доступ:\nhttps://t.me/+iajWR6wB4IU4MThi"
             )
         else:
             await callback.message.answer(
