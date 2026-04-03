@@ -28,6 +28,11 @@ app = FastAPI()
 app.include_router(payment_router, prefix="/api/payment")
 
 
+@app.on_event("startup")
+async def startup():
+    await create_pool()
+
+
 def get_buy_keyboard(user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [
